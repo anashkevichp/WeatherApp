@@ -7,58 +7,177 @@
 //
 
 #import "MainTableViewController.h"
-#import "WeatherController.h"
+#import "WeatherDetailController.h"
+#import "WeatherViewCell.h"
+#import "AFNetworking.h"
+#import "Weather.h"
+
+#define BASE_URL @"http://api.openweathermap.org/data/2.5/weather"
+#define DEFAULT_WEATHER_PLIST_NAME @"defaultWeather"
+#define WEATHER_PLIST_NAME @"weather.plist"
 
 @interface MainTableViewController ()
+{
+    int updateCounter;
+}
+
+- (void) updateCounter:(NSNotification *) notification;
 
 @end
 
 @implementation MainTableViewController {
-    WeatherController *weatherController;
+    NSMutableDictionary *weatherDict;
+    NSMutableArray *weatherArray;
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    // test
-    weatherController = [[WeatherController alloc] init];
-    [weatherController getCurrentWeather:@"Minsk"];
+    weatherArray = [[NSMutableArray alloc] init];
+    weatherDict = [[NSMutableDictionary alloc] init];
     
-    // Uncomment the following line to preserve selection between presentations.
-    // self.clearsSelectionOnViewWillAppear = NO;
+    updateCounter = 0;
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateCounter:) name:@"UpdateCounter" object:nil];
     
-    // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    NSString *filePath = [self getWeatherPlistFilePath];
+    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
+        NSLog(@"file exists");
+        [self readDictFromPlist];
+    } else {
+        NSLog(@"first run!");
+        [self readDefaultWeatherFromPlist];
+    }
+    [self convertDictToArray];
+    [self updateWeatherInformation];
 }
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
 }
 
 #pragma mark - Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-#warning Potentially incomplete method implementation.
-    // Return the number of sections.
-    return 0;
+    return 1;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-#warning Incomplete method implementation.
-    // Return the number of rows in the section.
-    return 0;
+    return [weatherArray count];
 }
 
-/*
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:<#@"reuseIdentifier"#> forIndexPath:indexPath];
+    static NSString *cellIdentifier = @"WeatherCellIdentifier";
+    WeatherViewCell *cell = [self.tableView dequeueReusableCellWithIdentifier:cellIdentifier];
     
-    // Configure the cell...
+    if (cell == nil) {
+        cell = [[WeatherViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier: cellIdentifier];
+    }
+    
+    long row = [indexPath row];
+    Weather *weather = [[Weather alloc] init];
+    weather = [weatherArray objectAtIndex:row];
+    
+    cell.cityLabel.text = [weather city];
+    cell.tempLabel.text = [NSString stringWithFormat:@"%.1f°", [weather currentTempreture]];
     
     return cell;
 }
-*/
+
+- (void) getWeatherByCity:(NSString *) city
+{
+    NSString *requestURLText = [NSString stringWithFormat:@"%@?q=%@", BASE_URL, city];
+    NSURL *requestURL = [NSURL URLWithString:requestURLText];
+    
+    NSURLRequest *request = [NSURLRequest requestWithURL:requestURL];
+    
+    AFHTTPRequestOperation *operation = [[AFHTTPRequestOperation alloc] initWithRequest:request];
+    operation.responseSerializer = [AFJSONResponseSerializer serializer];
+    
+    [operation setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id responseObject) {
+        NSDictionary *currentWeather = [[NSDictionary alloc] init];
+        currentWeather = (NSDictionary *) responseObject;
+        [weatherDict setObject:currentWeather forKey:city];
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"UpdateCounter" object:self];
+        
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"connection fail");
+    }];
+    
+    [operation start];
+}
+
+- (void) updateWeatherInformation
+{
+    for (Weather *weather in weatherArray) {
+        [self getWeatherByCity:[weather city]];
+    }
+}
+
+- (void) convertDictToArray
+{
+    weatherArray = [[NSMutableArray alloc] init];
+    
+    Weather *weather;
+    for (NSString *key in [weatherDict allKeys]) {
+        
+        weather = [[Weather alloc] init];
+        NSDictionary *currentWeather = [weatherDict valueForKey:key];
+        
+        weather.city = currentWeather[@"name"];
+        weather.currentTempreture = [self kelvinToCelcius:[currentWeather[@"main"][@"temp"] doubleValue]];
+        
+        [weatherArray addObject:weather];
+    }
+}
+
+- (double) kelvinToCelcius:(double) degrees
+{
+    const double CELSIUS_ZERO_IN_KELVIN = 273.15;
+    return degrees - CELSIUS_ZERO_IN_KELVIN;
+}
+
+- (void) readDefaultWeatherFromPlist
+{
+    NSString *defaultWeatherFilePath = [[NSBundle mainBundle] pathForResource:DEFAULT_WEATHER_PLIST_NAME ofType:@"plist"];
+    if ([[NSFileManager defaultManager] fileExistsAtPath:defaultWeatherFilePath]) {
+        weatherDict = [NSMutableDictionary dictionaryWithContentsOfFile:defaultWeatherFilePath];
+    }
+}
+
+- (void) saveWeatherDictToPlist
+{
+    NSString *filePath = [self getWeatherPlistFilePath];
+    [weatherDict writeToFile:filePath atomically:YES];
+}
+
+- (void) readDictFromPlist
+{
+    NSString *filePath = [self getWeatherPlistFilePath];
+    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
+        weatherDict = [NSMutableDictionary dictionaryWithContentsOfFile:filePath];
+    }
+}
+
+- (NSString *) getWeatherPlistFilePath
+{
+    NSArray	*paths = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES);
+    NSString *documentsDir = [paths objectAtIndex:0];
+    NSString *filePath = [documentsDir stringByAppendingPathComponent:WEATHER_PLIST_NAME];
+    return filePath;
+}
+
+- (void) updateCounter:(NSNotification *)notification
+{
+    updateCounter++;
+    
+    if (updateCounter == (int)[weatherArray count]) {
+        [self convertDictToArray];
+        [self saveWeatherDictToPlist];
+        [[self tableView] reloadData];
+        [[NSNotificationCenter defaultCenter] removeObserver:self];
+    }
+}
 
 /*
 // Override to support conditional editing of the table view.
@@ -68,17 +187,22 @@
 }
 */
 
-/*
 // Override to support editing the table view.
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         // Delete the row from the data source
+        
+        NSInteger selected = [[self.tableView indexPathForSelectedRow] row];
+        [weatherArray removeObjectAtIndex:selected];
+        
+        // remove data from plist / dictionary
+        
         [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
     } else if (editingStyle == UITableViewCellEditingStyleInsert) {
         // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-    }   
+        NSLog(@"adding item");
+    }
 }
-*/
 
 /*
 // Override to support rearranging the table view.
@@ -94,14 +218,19 @@
 }
 */
 
-/*
 #pragma mark - Navigation
 
-// In a storyboard-based application, you will often want to do a little preparation before navigation
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
+    if ([[segue identifier] isEqualToString:@"WeatherDetailSegue"]) {
+        WeatherDetailController *detailController  = [segue destinationViewController];
+        
+        NSInteger selected = [[self.tableView indexPathForSelectedRow] row];
+        
+        detailController.weather = [weatherArray objectAtIndex:selected];
+        
+        NSString *city = [[weatherArray objectAtIndex:selected] city];
+        detailController.navigationItem.title = city;
+    }
 }
-*/
 
 @end

@@ -10,6 +10,4 @@
 
 @implementation Weather
 
-@synthesize city;
-
 @end

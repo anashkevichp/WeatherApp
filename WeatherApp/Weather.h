@@ -11,11 +11,8 @@
 @interface Weather : NSObject
 
 @property (nonatomic, copy) NSString *city;
-@property (nonatomic, copy) NSString *country;
 
 @property (nonatomic, copy) NSDate *reportTime;
-@property (nonatomic, copy) NSDate *sunrise;
-@property (nonatomic, copy) NSDate *sunset;
 
 @property (nonatomic, copy) NSArray *conditions;
 
@@ -25,7 +22,7 @@
 @property (nonatomic) NSInteger rain3hours;
 @property (nonatomic) NSInteger show3hours;
 
-@property (nonatomic) float tempCurrent;
+@property (nonatomic) float currentTempreture;
 
 @property (nonatomic) NSInteger windDirection;
 
