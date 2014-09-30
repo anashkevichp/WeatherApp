@@ -68,9 +68,9 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="l6t-ox-Axe" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="160.5" y="-18"/>
+            <point key="canvasLocation" x="160.5" y="-25"/>
         </scene>
-        <!--test-->
+        <!--Weather Detail Controller-->
         <scene sceneID="BSQ-t4-vAk">
             <objects>
                 <tableViewController id="g0d-Ma-N5R" customClass="WeatherDetailController" sceneMemberID="viewController">
@@ -84,35 +84,35 @@
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="fqd-tP-6fS" id="wDw-eU-vcJ">
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="nameLabel" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="81f-I4-An5">
-                                            <rect key="frame" x="0.0" y="-21" width="42" height="21"/>
-                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                            <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
-                                            <nil key="highlightedColor"/>
-                                            <variation key="widthClass=compact" fixedFrame="YES">
-                                                <rect key="frame" x="17" y="13" width="144" height="21"/>
-                                            </variation>
-                                        </label>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="valueLabel" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="WQs-7X-6m9">
                                             <rect key="frame" x="0.0" y="-21" width="42" height="21"/>
-                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                             <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                             <nil key="highlightedColor"/>
                                             <variation key="widthClass=compact" fixedFrame="YES">
-                                                <rect key="frame" x="206" y="12" width="117" height="21"/>
+                                                <rect key="frame" x="231" y="11" width="62" height="21"/>
+                                            </variation>
+                                        </label>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="nameLabel" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="81f-I4-An5">
+                                            <rect key="frame" x="0.0" y="-21" width="42" height="21"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                            <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                            <nil key="highlightedColor"/>
+                                            <variation key="widthClass=compact" fixedFrame="YES">
+                                                <rect key="frame" x="17" y="14" width="289" height="21"/>
                                             </variation>
                                         </label>
                                     </subviews>
                                     <variation key="default">
                                         <mask key="subviews">
-                                            <exclude reference="81f-I4-An5"/>
                                             <exclude reference="WQs-7X-6m9"/>
+                                            <exclude reference="81f-I4-An5"/>
                                         </mask>
                                     </variation>
                                     <variation key="widthClass=compact">
                                         <mask key="subviews">
-                                            <include reference="81f-I4-An5"/>
                                             <include reference="WQs-7X-6m9"/>
+                                            <include reference="81f-I4-An5"/>
                                         </mask>
                                     </variation>
                                 </tableViewCellContentView>
@@ -127,11 +127,11 @@
                             <outlet property="delegate" destination="g0d-Ma-N5R" id="Zl9-N4-jvn"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="test" id="cna-RL-XEu"/>
+                    <navigationItem key="navigationItem" id="cna-RL-XEu"/>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Bnb-FL-NLc" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="871.5" y="-22"/>
+            <point key="canvasLocation" x="871.5" y="-25"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="PfV-Gt-r3i">
@@ -147,7 +147,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Hh7-3e-xXg" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-580" y="-18"/>
+            <point key="canvasLocation" x="-580.5" y="-25"/>
         </scene>
     </scenes>
 </document>

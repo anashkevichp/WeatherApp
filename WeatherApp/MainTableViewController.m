@@ -19,9 +19,10 @@
 @interface MainTableViewController ()
 {
     int updateCounter;
+    BOOL connectionSuccess;
 }
 
-- (void) updateCounter:(NSNotification *) notification;
+// - (void) updateCounter:(NSNotification *) notification;
 
 @end
 
@@ -36,19 +37,23 @@
     weatherArray = [[NSMutableArray alloc] init];
     weatherDict = [[NSMutableDictionary alloc] init];
     
+    connectionSuccess = YES;
     updateCounter = 0;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateCounter:) name:@"UpdateCounter" object:nil];
     
     NSString *filePath = [self getWeatherPlistFilePath];
     if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
-        NSLog(@"file exists");
         [self readDictFromPlist];
     } else {
-        NSLog(@"first run!");
         [self readDefaultWeatherFromPlist];
     }
     [self convertDictToArray];
     [self updateWeatherInformation];
+    
+    UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
+    refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"Pull to refresh"];
+    [refreshControl addTarget:self action:@selector(refreshTableView:) forControlEvents:UIControlEventValueChanged];
+    self.refreshControl = refreshControl;
 }
 
 - (void)didReceiveMemoryWarning {
@@ -83,6 +88,23 @@
     return cell;
 }
 
+- (void) refreshTableView:(UIRefreshControl *) refreshControl
+{
+    refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"Refreshing weather..."];
+    
+    updateCounter = 0;
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateCounter:) name:@"UpdateCounter" object:nil];
+    [self updateWeatherInformation];
+    
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    [formatter setDateFormat:@"MMM d, h:mm a"];
+    
+    NSString *lastUpdated = [NSString stringWithFormat:@"Last updated on %@", [formatter stringFromDate:[NSDate date]]];
+    refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:lastUpdated];
+    
+    [refreshControl endRefreshing];
+}
+
 - (void) getWeatherByCity:(NSString *) city
 {
     NSString *requestURLText = [NSString stringWithFormat:@"%@?q=%@", BASE_URL, city];
@@ -94,14 +116,17 @@
     operation.responseSerializer = [AFJSONResponseSerializer serializer];
     
     [operation setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id responseObject) {
+        connectionSuccess = YES;
+        
         NSDictionary *currentWeather = [[NSDictionary alloc] init];
         currentWeather = (NSDictionary *) responseObject;
         [weatherDict setObject:currentWeather forKey:city];
-        
         [[NSNotificationCenter defaultCenter] postNotificationName:@"UpdateCounter" object:self];
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        NSLog(@"connection fail");
+        
+        connectionSuccess = NO;
+        
     }];
     
     [operation start];
@@ -110,7 +135,20 @@
 - (void) updateWeatherInformation
 {
     for (Weather *weather in weatherArray) {
-        [self getWeatherByCity:[weather city]];
+        if (connectionSuccess) {
+            [self getWeatherByCity:[weather city]];
+        } else {
+            break;
+        }
+    }
+    
+    if (!connectionSuccess) {
+        UIAlertView *errorAlertView = [[UIAlertView alloc] initWithTitle:@"Update error"
+                                                                 message:@"Please, check your internet connection"
+                                                                delegate:nil
+                                                       cancelButtonTitle:@"OK"
+                                                       otherButtonTitles:nil];
+        [errorAlertView show];
     }
 }
 
@@ -125,7 +163,19 @@
         NSDictionary *currentWeather = [weatherDict valueForKey:key];
         
         weather.city = currentWeather[@"name"];
+        weather.country = currentWeather[@"sys"][@"country"];
+        
         weather.currentTempreture = [self kelvinToCelcius:[currentWeather[@"main"][@"temp"] doubleValue]];
+        weather.minTempreture = [self kelvinToCelcius:[currentWeather[@"main"][@"temp_min"] doubleValue]];
+        weather.maxTempreture = [self kelvinToCelcius:[currentWeather[@"main"][@"temp_max"] doubleValue]];
+        
+        weather.humidity = [currentWeather[@"main"][@"humidity"] integerValue];
+        weather.windSpeed = [currentWeather[@"wind"][@"speed"] doubleValue];
+        weather.pressure = [currentWeather[@"main"][@"pressure"] integerValue];
+        weather.cloudCover = [currentWeather[@"clouds"][@"all"] integerValue];
+        
+        weather.rain3hours = [currentWeather[@"rain"][@"3h"] integerValue];
+        weather.snow3hours = [currentWeather[@"snow"][@"3h"] integerValue];
         
         [weatherArray addObject:weather];
     }
@@ -193,15 +243,26 @@
         // Delete the row from the data source
         
         NSInteger selected = [[self.tableView indexPathForSelectedRow] row];
+        NSString *selectedCity = [[weatherArray objectAtIndex:selected] city];
         [weatherArray removeObjectAtIndex:selected];
-        
-        // remove data from plist / dictionary
+        [weatherDict removeObjectForKey:selectedCity];
+        [self saveWeatherDictToPlist];
         
         [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
     } else if (editingStyle == UITableViewCellEditingStyleInsert) {
         // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
         NSLog(@"adding item");
     }
+}
+
+- (CGFloat) tableView:(UITableView *)tableView estimatedHeightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 44;
+}
+
+- (CGFloat) tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 44;
 }
 
 /*
@@ -229,7 +290,9 @@
         detailController.weather = [weatherArray objectAtIndex:selected];
         
         NSString *city = [[weatherArray objectAtIndex:selected] city];
-        detailController.navigationItem.title = city;
+        NSString *country = [[weatherArray objectAtIndex:selected] country];
+        NSString *title = [NSString stringWithFormat:@"%@, %@", city, country];
+        detailController.navigationItem.title = title;
     }
 }
 

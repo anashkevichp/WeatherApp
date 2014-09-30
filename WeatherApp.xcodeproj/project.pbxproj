@@ -109,8 +109,9 @@
 		8431333419D41ED700396ABD /* WeatherApp */ = {
 			isa = PBXGroup;
 			children = (
-				845F383919D6136A0089166D /* view */,
 				845F383419D610AD0089166D /* model */,
+				845F383919D6136A0089166D /* view */,
+				84793D5819DB498500AD6C76 /* plist */,
 				845F383A19D61CD10089166D /* MainTableViewController.h */,
 				845F383B19D61CD10089166D /* MainTableViewController.m */,
 				8431333919D41ED700396ABD /* AppDelegate.h */,
@@ -119,7 +120,6 @@
 				8431334219D41ED700396ABD /* Images.xcassets */,
 				8431334419D41ED700396ABD /* LaunchScreen.xib */,
 				8431333519D41ED700396ABD /* Supporting Files */,
-				84F453B919D9E1D5001B317E /* defaultWeather.plist */,
 			);
 			path = WeatherApp;
 			sourceTree = "<group>";
@@ -170,6 +170,14 @@
 				84E5837E19DA08C0006FD81C /* WeatherDetailCell.m */,
 			);
 			name = view;
+			sourceTree = "<group>";
+		};
+		84793D5819DB498500AD6C76 /* plist */ = {
+			isa = PBXGroup;
+			children = (
+				84F453B919D9E1D5001B317E /* defaultWeather.plist */,
+			);
+			name = plist;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
