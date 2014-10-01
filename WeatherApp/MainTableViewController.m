@@ -8,6 +8,7 @@
 
 #import "MainTableViewController.h"
 #import "WeatherDetailController.h"
+#import "AddWeatherController.h"
 #import "WeatherViewCell.h"
 #import "AFNetworking.h"
 #import "Weather.h"
@@ -15,6 +16,7 @@
 #define BASE_URL @"http://api.openweathermap.org/data/2.5/weather"
 #define DEFAULT_WEATHER_PLIST_NAME @"defaultWeather"
 #define WEATHER_PLIST_NAME @"weather.plist"
+#define SUCCESS_CITY_CODE 200
 
 @interface MainTableViewController ()
 {
@@ -22,7 +24,24 @@
     BOOL connectionSuccess;
 }
 
-// - (void) updateCounter:(NSNotification *) notification;
+- (void) updateWeatherInformation;
+- (void) getWeatherByCity:(NSString *) city;
+
+- (void) refreshTableView:(UIRefreshControl *) refreshControl;
+- (void) convertDictToArray;
+- (void) updateCounter:(NSNotification *) notification;
+
+- (void) readDefaultWeatherFromPlist;
+- (void) readDictFromPlist;
+- (void) saveWeatherDictToPlist;
+- (NSString *) getWeatherPlistFilePath;
+
+- (void) showConnectionError;
+- (void) showDeleteError;
+- (void) showCityError:(NSNotification *) notification;
+
+- (IBAction)cancel:(UIStoryboardSegue *) segue;
+- (IBAction)done:(UIStoryboardSegue *) segue;
 
 @end
 
@@ -88,21 +107,35 @@
     return cell;
 }
 
-- (void) refreshTableView:(UIRefreshControl *) refreshControl
+
+- (IBAction)done:(UIStoryboardSegue *)segue
 {
-    refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"Refreshing weather..."];
+    AddWeatherController *addWeatherController = [segue sourceViewController];
+    NSString *city = [addWeatherController city];
     
-    updateCounter = 0;
+    updateCounter = (int)[weatherArray count] - 1;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateCounter:) name:@"UpdateCounter" object:nil];
-    [self updateWeatherInformation];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showCityError:) name:@"ShowCityError" object:nil];
+    [self getWeatherByCity:city];
+}
+
+- (IBAction)cancel:(UIStoryboardSegue *)segue
+{
     
-    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-    [formatter setDateFormat:@"MMM d, h:mm a"];
-    
-    NSString *lastUpdated = [NSString stringWithFormat:@"Last updated on %@", [formatter stringFromDate:[NSDate date]]];
-    refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:lastUpdated];
-    
-    [refreshControl endRefreshing];
+}
+
+- (void) updateWeatherInformation
+{
+    for (Weather *weather in weatherArray) {
+        if (connectionSuccess) {
+            [self getWeatherByCity:[weather city]];
+        } else {
+            break;
+        }
+    }
+    if (!connectionSuccess) {
+        [self showConnectionError];
+    }
 }
 
 - (void) getWeatherByCity:(NSString *) city
@@ -120,36 +153,39 @@
         
         NSDictionary *currentWeather = [[NSDictionary alloc] init];
         currentWeather = (NSDictionary *) responseObject;
-        [weatherDict setObject:currentWeather forKey:city];
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"UpdateCounter" object:self];
+        
+        if ([currentWeather[@"cod"] integerValue] == SUCCESS_CITY_CODE) {
+            
+            [weatherDict setObject:currentWeather forKey:currentWeather[@"name"]];
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"UpdateCounter" object:self];
+            
+        } else {
+            
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"ShowCityError" object:self];
+        }
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         
         connectionSuccess = NO;
         
     }];
-    
     [operation start];
 }
 
-- (void) updateWeatherInformation
+- (void) refreshTableView:(UIRefreshControl *) refreshControl
 {
-    for (Weather *weather in weatherArray) {
-        if (connectionSuccess) {
-            [self getWeatherByCity:[weather city]];
-        } else {
-            break;
-        }
-    }
+    refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:@"Refreshing weather..."];
     
-    if (!connectionSuccess) {
-        UIAlertView *errorAlertView = [[UIAlertView alloc] initWithTitle:@"Update error"
-                                                                 message:@"Please, check your internet connection"
-                                                                delegate:nil
-                                                       cancelButtonTitle:@"OK"
-                                                       otherButtonTitles:nil];
-        [errorAlertView show];
-    }
+    updateCounter = 0;
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateCounter:) name:@"UpdateCounter" object:nil];
+    [self updateWeatherInformation];
+    
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    [formatter setDateFormat:@"MMM d, h:mm a"];
+    NSString *lastUpdated = [NSString stringWithFormat:@"Last updated on %@", [formatter stringFromDate:[NSDate date]]];
+    refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:lastUpdated];
+    
+    [refreshControl endRefreshing];
 }
 
 - (void) convertDictToArray
@@ -179,12 +215,6 @@
         
         [weatherArray addObject:weather];
     }
-}
-
-- (double) kelvinToCelcius:(double) degrees
-{
-    const double CELSIUS_ZERO_IN_KELVIN = 273.15;
-    return degrees - CELSIUS_ZERO_IN_KELVIN;
 }
 
 - (void) readDefaultWeatherFromPlist
@@ -229,30 +259,59 @@
     }
 }
 
-/*
-// Override to support conditional editing of the table view.
-- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
-    // Return NO if you do not want the specified item to be editable.
-    return YES;
-}
-*/
-
-// Override to support editing the table view.
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
-        // Delete the row from the data source
         
-        NSInteger selected = [[self.tableView indexPathForSelectedRow] row];
-        NSString *selectedCity = [[weatherArray objectAtIndex:selected] city];
-        [weatherArray removeObjectAtIndex:selected];
-        [weatherDict removeObjectForKey:selectedCity];
-        [self saveWeatherDictToPlist];
+        if ([weatherArray count] > 1) {
+            NSInteger selected = [indexPath row];
         
-        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
-    } else if (editingStyle == UITableViewCellEditingStyleInsert) {
-        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        NSLog(@"adding item");
+            NSString *selectedCity = [[weatherArray objectAtIndex:selected] city];
+            [weatherArray removeObjectAtIndex:selected];
+            [weatherDict removeObjectForKey:selectedCity];
+            [self saveWeatherDictToPlist];
+        
+            [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+        } else {
+            [self showDeleteError];
+        }
     }
+}
+
+- (void) showConnectionError
+{
+    UIAlertView *errorAlertView = [[UIAlertView alloc] initWithTitle:@"Update error"
+                                                             message:@"Please, check your internet connection"
+                                                            delegate:nil
+                                                   cancelButtonTitle:@"OK"
+                                                   otherButtonTitles:nil];
+    [errorAlertView show];
+}
+
+- (void) showDeleteError
+{
+    UIAlertView *errorAlertView = [[UIAlertView alloc] initWithTitle:@"Delete error"
+                                                             message:@"Impossible to delete last city"
+                                                            delegate:nil
+                                                   cancelButtonTitle:@"OK"
+                                                   otherButtonTitles:nil];
+    [errorAlertView show];
+}
+
+- (void) showCityError:(NSNotification *) notification
+{
+    UIAlertView *errorAlertView = [[UIAlertView alloc] initWithTitle:@"City error"
+                                                             message:@"Please, check name of the city"
+                                                            delegate:nil
+                                                   cancelButtonTitle:@"OK"
+                                                   otherButtonTitles:nil];
+    [errorAlertView show];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (double) kelvinToCelcius:(double) degrees
+{
+    const double CELSIUS_ZERO_IN_KELVIN = 273.15;
+    return degrees - CELSIUS_ZERO_IN_KELVIN;
 }
 
 - (CGFloat) tableView:(UITableView *)tableView estimatedHeightForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -264,20 +323,6 @@
 {
     return 44;
 }
-
-/*
-// Override to support rearranging the table view.
-- (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath {
-}
-*/
-
-/*
-// Override to support conditional rearranging of the table view.
-- (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath {
-    // Return NO if you do not want the item to be re-orderable.
-    return YES;
-}
-*/
 
 #pragma mark - Navigation
 

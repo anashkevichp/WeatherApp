@@ -16,6 +16,7 @@
 		8431335219D41ED700396ABD /* WeatherAppTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8431335119D41ED700396ABD /* WeatherAppTests.m */; };
 		845F383319D6109D0089166D /* Weather.m in Sources */ = {isa = PBXBuildFile; fileRef = 845F383219D6109D0089166D /* Weather.m */; };
 		845F383C19D61CD10089166D /* MainTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 845F383B19D61CD10089166D /* MainTableViewController.m */; };
+		849F244D19DBF5FD00DF4A39 /* AddWeatherController.m in Sources */ = {isa = PBXBuildFile; fileRef = 849F244C19DBF5FD00DF4A39 /* AddWeatherController.m */; };
 		84A000B319D99C66001C00B0 /* WeatherViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 84A000B219D99C66001C00B0 /* WeatherViewCell.m */; };
 		84E5837F19DA08C0006FD81C /* WeatherDetailCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 84E5837E19DA08C0006FD81C /* WeatherDetailCell.m */; };
 		84F453BA19D9E1D5001B317E /* defaultWeather.plist in Resources */ = {isa = PBXBuildFile; fileRef = 84F453B919D9E1D5001B317E /* defaultWeather.plist */; };
@@ -49,6 +50,8 @@
 		845F383219D6109D0089166D /* Weather.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Weather.m; sourceTree = "<group>"; };
 		845F383A19D61CD10089166D /* MainTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MainTableViewController.h; sourceTree = "<group>"; };
 		845F383B19D61CD10089166D /* MainTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MainTableViewController.m; sourceTree = "<group>"; };
+		849F244B19DBF5FD00DF4A39 /* AddWeatherController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AddWeatherController.h; sourceTree = "<group>"; };
+		849F244C19DBF5FD00DF4A39 /* AddWeatherController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AddWeatherController.m; sourceTree = "<group>"; };
 		84A000B119D99C66001C00B0 /* WeatherViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WeatherViewCell.h; sourceTree = "<group>"; };
 		84A000B219D99C66001C00B0 /* WeatherViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WeatherViewCell.m; sourceTree = "<group>"; };
 		84E5837D19DA08C0006FD81C /* WeatherDetailCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WeatherDetailCell.h; sourceTree = "<group>"; };
@@ -162,12 +165,11 @@
 		845F383919D6136A0089166D /* view */ = {
 			isa = PBXGroup;
 			children = (
-				84A000B119D99C66001C00B0 /* WeatherViewCell.h */,
-				84A000B219D99C66001C00B0 /* WeatherViewCell.m */,
+				849F244A19DBF57F00DF4A39 /* cells */,
 				84F453BB19D9FE9B001B317E /* WeatherDetailController.h */,
 				84F453BC19D9FE9B001B317E /* WeatherDetailController.m */,
-				84E5837D19DA08C0006FD81C /* WeatherDetailCell.h */,
-				84E5837E19DA08C0006FD81C /* WeatherDetailCell.m */,
+				849F244B19DBF5FD00DF4A39 /* AddWeatherController.h */,
+				849F244C19DBF5FD00DF4A39 /* AddWeatherController.m */,
 			);
 			name = view;
 			sourceTree = "<group>";
@@ -178,6 +180,17 @@
 				84F453B919D9E1D5001B317E /* defaultWeather.plist */,
 			);
 			name = plist;
+			sourceTree = "<group>";
+		};
+		849F244A19DBF57F00DF4A39 /* cells */ = {
+			isa = PBXGroup;
+			children = (
+				84E5837D19DA08C0006FD81C /* WeatherDetailCell.h */,
+				84E5837E19DA08C0006FD81C /* WeatherDetailCell.m */,
+				84A000B119D99C66001C00B0 /* WeatherViewCell.h */,
+				84A000B219D99C66001C00B0 /* WeatherViewCell.m */,
+			);
+			name = cells;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -323,6 +336,7 @@
 				84A000B319D99C66001C00B0 /* WeatherViewCell.m in Sources */,
 				84F453BD19D9FE9B001B317E /* WeatherDetailController.m in Sources */,
 				845F383C19D61CD10089166D /* MainTableViewController.m in Sources */,
+				849F244D19DBF5FD00DF4A39 /* AddWeatherController.m in Sources */,
 				8431333819D41ED700396ABD /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

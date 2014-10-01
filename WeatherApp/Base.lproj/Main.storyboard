@@ -64,11 +64,17 @@
                             <outlet property="delegate" destination="IfY-XH-9RB" id="yva-fm-HVQ"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Current Tempreture" id="zFH-Cs-eGk"/>
+                    <navigationItem key="navigationItem" title="Current Tempreture" id="zFH-Cs-eGk">
+                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="YOg-OC-dqG">
+                            <connections>
+                                <segue destination="UBt-Ln-ZsC" kind="presentation" id="2dy-3f-cGq"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="l6t-ox-Axe" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="160.5" y="-25"/>
+            <point key="canvasLocation" x="115.5" y="-361"/>
         </scene>
         <!--Weather Detail Controller-->
         <scene sceneID="BSQ-t4-vAk">
@@ -90,7 +96,7 @@
                                             <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                             <nil key="highlightedColor"/>
                                             <variation key="widthClass=compact" fixedFrame="YES">
-                                                <rect key="frame" x="231" y="11" width="62" height="21"/>
+                                                <rect key="frame" x="188" y="12" width="105" height="21"/>
                                             </variation>
                                         </label>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="nameLabel" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="81f-I4-An5">
@@ -131,7 +137,76 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Bnb-FL-NLc" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="871.5" y="-25"/>
+            <point key="canvasLocation" x="891" y="23"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="n2e-Hs-LRn">
+            <objects>
+                <navigationController id="UBt-Ln-ZsC" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="K7O-CD-Unt">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="0d8-Cb-W9r" kind="relationship" relationship="rootViewController" id="70q-zL-wyn"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="ByH-31-J3A" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="891" y="-695"/>
+        </scene>
+        <!--Add Weather Controller-->
+        <scene sceneID="QGO-En-Abm">
+            <objects>
+                <viewController id="0d8-Cb-W9r" customClass="AddWeatherController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="WEg-gp-Dhh"/>
+                        <viewControllerLayoutGuide type="bottom" id="phY-WB-3Cd"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="fI4-Cs-ZXa">
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="L1b-sL-x9P">
+                                <rect key="frame" x="0.0" y="-30" width="97" height="30"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                                <variation key="widthClass=compact" fixedFrame="YES">
+                                    <rect key="frame" x="64" y="191" width="198" height="30"/>
+                                </variation>
+                            </textField>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <variation key="default">
+                            <mask key="subviews">
+                                <exclude reference="L1b-sL-x9P"/>
+                            </mask>
+                        </variation>
+                        <variation key="widthClass=compact">
+                            <mask key="subviews">
+                                <include reference="L1b-sL-x9P"/>
+                            </mask>
+                        </variation>
+                    </view>
+                    <navigationItem key="navigationItem" id="cGl-SK-spf">
+                        <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="Y1l-3y-gTc">
+                            <connections>
+                                <segue destination="d9U-dJ-d5J" kind="unwind" identifier="cancelSegue" unwindAction="cancel:" id="2iO-OU-s5T"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem key="rightBarButtonItem" systemItem="done" id="v7p-To-Bqm">
+                            <connections>
+                                <segue destination="d9U-dJ-d5J" kind="unwind" identifier="doneSegue" unwindAction="done:" id="2pD-LU-vN6"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="name" destination="L1b-sL-x9P" id="k2d-1b-JvB"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="JCN-M4-sg3" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <exit id="d9U-dJ-d5J" userLabel="Exit" sceneMemberID="exit"/>
+            </objects>
+            <point key="canvasLocation" x="1632" y="-695"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="PfV-Gt-r3i">
@@ -147,7 +222,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Hh7-3e-xXg" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-580.5" y="-25"/>
+            <point key="canvasLocation" x="-625.5" y="-361"/>
         </scene>
     </scenes>
 </document>
